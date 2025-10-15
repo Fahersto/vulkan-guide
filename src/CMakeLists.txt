@@ -1,4 +1,3 @@
-
 # Add source to this project's executable.
 add_executable (engine 
   main.cpp
@@ -18,6 +17,8 @@ add_executable (engine
   camera.cpp
   camera.h
 )
+
+add_dependencies(engine Shaders)
 
 set_property(TARGET engine PROPERTY CXX_STANDARD 20)
 target_compile_definitions(engine PUBLIC GLM_FORCE_DEPTH_ZERO_TO_ONE)
