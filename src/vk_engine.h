@@ -7,6 +7,21 @@
 
 #include "vk_descriptors.h"
 
+struct ComputePushConstants {
+	glm::vec4 data1;
+	glm::vec4 data2;
+	glm::vec4 data3;
+	glm::vec4 data4;
+};
+
+struct ComputeEffect {
+	const char* name;
+
+	VkPipeline pipeline;
+	VkPipelineLayout layout;
+
+	ComputePushConstants data;
+};
 
 struct DeletionQueue
 {
@@ -112,6 +127,9 @@ public:
 	VkFence _immFence;
 	VkCommandBuffer _immCommandBuffer;
 	VkCommandPool _immCommandPool;
+
+	std::vector<ComputeEffect> backgroundEffects;
+	int currentBackgroundEffect{0};
 private:
 
 	void init_vulkan();
