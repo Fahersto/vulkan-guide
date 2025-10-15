@@ -59,9 +59,12 @@ public:
 
 	//draw loop
 	void draw();
+	void draw_imgui(VkCommandBuffer cmd, VkImageView targetImageView);
 
 	//run main loop
 	void run();
+
+	void immediate_submit(std::function<void(VkCommandBuffer cmd)>&& function);
 
 	VkInstance _instance;// Vulkan library handle
 	VkDebugUtilsMessengerEXT _debug_messenger;// Vulkan debug output handle
@@ -102,6 +105,13 @@ public:
 
 	VkPipeline _gradientPipeline;
 	VkPipelineLayout _gradientPipelineLayout;
+
+
+	// immediate submit structures
+	// TODO are these needed? https://vkguide.dev/docs/new_chapter_2/vulkan_imgui_setup/
+	VkFence _immFence;
+	VkCommandBuffer _immCommandBuffer;
+	VkCommandPool _immCommandPool;
 private:
 
 	void init_vulkan();
@@ -116,4 +126,6 @@ private:
 
 	void init_pipelines();
 	void init_background_pipelines();
+
+	void init_imgui();
 };
