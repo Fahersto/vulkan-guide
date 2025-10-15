@@ -7,6 +7,7 @@
 
 #include "vk_descriptors.h"
 
+struct MeshAsset;
 struct ComputePushConstants {
 	glm::vec4 data1;
 	glm::vec4 data2;
@@ -117,6 +118,7 @@ public:
 
 	//draw resources
 	AllocatedImage _drawImage;
+	AllocatedImage _depthImage;
 	VkExtent2D _drawExtent;
 
 	DescriptorAllocator globalDescriptorAllocator;
@@ -127,6 +129,7 @@ public:
 	VkPipeline _gradientPipeline;
 	VkPipelineLayout _gradientPipelineLayout;
 
+	std::vector<std::shared_ptr<MeshAsset>> testMeshes;
 
 	// immediate submit structures
 	// TODO are these needed? https://vkguide.dev/docs/new_chapter_2/vulkan_imgui_setup/
