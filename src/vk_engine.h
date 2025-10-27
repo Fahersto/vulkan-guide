@@ -154,6 +154,8 @@ public:
 	void init_triangle_pipeline();
 
 	void init_default_data();
+
+	void resize_swapchain();
 private:
 
 	void init_vulkan();
@@ -170,4 +172,8 @@ private:
 	void init_background_pipelines();
 
 	void init_imgui();
+
+	bool resize_requested = false;
+
+	float renderScale = 1.f;
 };
