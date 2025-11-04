@@ -6,6 +6,7 @@
 #include <vk_types.h>
 
 #include "vk_descriptors.h"
+#include "camera.h"
 
 class VulkanEngine;
 struct MeshAsset;
@@ -232,6 +233,8 @@ public:
 
 	DrawContext mainDrawContext;
 	std::unordered_map<std::string, std::shared_ptr<Node>> loadedNodes;
+
+	Camera mainCamera;
 
 	void init_mesh_pipeline();
 
