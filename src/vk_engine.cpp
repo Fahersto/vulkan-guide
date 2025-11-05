@@ -28,6 +28,44 @@ constexpr bool bUseValidationLayers = true;
 
 VulkanEngine& VulkanEngine::Get() { return *loadedEngine; }
 
+bool is_visible(const RenderObject& obj, const glm::mat4& viewproj) {
+    std::array<glm::vec3, 8> corners {
+        glm::vec3 { 1, 1, 1 },
+        glm::vec3 { 1, 1, -1 },
+        glm::vec3 { 1, -1, 1 },
+        glm::vec3 { 1, -1, -1 },
+        glm::vec3 { -1, 1, 1 },
+        glm::vec3 { -1, 1, -1 },
+        glm::vec3 { -1, -1, 1 },
+        glm::vec3 { -1, -1, -1 },
+    };
+
+    glm::mat4 matrix = viewproj * obj.transform;
+
+    glm::vec3 min = { 1.5, 1.5, 1.5 };
+    glm::vec3 max = { -1.5, -1.5, -1.5 };
+
+    for (int c = 0; c < 8; c++) {
+        // project each corner into clip space
+        glm::vec4 v = matrix * glm::vec4(obj.bounds.origin + (corners[c] * obj.bounds.extents), 1.f);
+
+        // perspective correction
+        v.x = v.x / v.w;
+        v.y = v.y / v.w;
+        v.z = v.z / v.w;
+
+        min = glm::min(glm::vec3 { v.x, v.y, v.z }, min);
+        max = glm::max(glm::vec3 { v.x, v.y, v.z }, max);
+    }
+
+    // check the clip space box is within the view
+    if (min.z > 1.f || max.z < 0.f || min.x > 1.f || max.x < -1.f || min.y > 1.f || max.y < -1.f) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
 void VulkanEngine::cleanup()
 {
     if (_isInitialized) {
@@ -932,7 +970,9 @@ void VulkanEngine::draw_geometry(VkCommandBuffer cmd) {
     opaque_draws.reserve(mainDrawContext.OpaqueSurfaces.size());
 
     for (uint32_t i = 0; i < mainDrawContext.OpaqueSurfaces.size(); i++) {
-        opaque_draws.push_back(i);
+        if (is_visible(mainDrawContext.OpaqueSurfaces[i], sceneData.viewproj)) {
+            opaque_draws.push_back(i);
+        }
     }
 
     // sort the opaque surfaces by material and mesh
@@ -1156,12 +1196,14 @@ AllocatedImage VulkanEngine::create_image(void* data, VkExtent3D size, VkFormat 
         vkCmdCopyBufferToImage(cmd, uploadbuffer.buffer, new_image.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1,
             &copyRegion);
 
-        vkutil::transition_image(cmd, new_image.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-        });
-
+        if (mipmapped) {
+            vkutil::generate_mipmaps(cmd, new_image.image,VkExtent2D{new_image.imageExtent.width,new_image.imageExtent.height});
+        } else {
+            vkutil::transition_image(cmd, new_image.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        }
+    });
     destroy_buffer(uploadbuffer);
-
     return new_image;
 }
 
@@ -1514,7 +1556,7 @@ void MeshNode::Draw(const glm::mat4& topMatrix, DrawContext& ctx)
         def.firstIndex = s.startIndex;
         def.indexBuffer = mesh->meshBuffers.indexBuffer.buffer;
         def.material = &s.material->data;
-        //def.bounds = s.bounds;
+        def.bounds = s.bounds;
         def.transform = nodeMatrix;
         def.vertexBufferAddress = mesh->meshBuffers.vertexBufferAddress;
 

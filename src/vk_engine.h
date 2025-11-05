@@ -119,7 +119,7 @@ struct RenderObject {
 	VkBuffer indexBuffer;
 
 	MaterialInstance* material;
-
+	Bounds bounds;
 	glm::mat4 transform;
 	VkDeviceAddress vertexBufferAddress;
 };
@@ -259,8 +259,8 @@ public:
 
 	void update_scene();
 
-	AllocatedImage create_image(VkExtent3D size, VkFormat format, VkImageUsageFlags usage, bool mipmapped = false);
-	AllocatedImage create_image(void* data, VkExtent3D size, VkFormat format, VkImageUsageFlags usage, bool mipmapped = false);
+	AllocatedImage create_image(VkExtent3D size, VkFormat format, VkImageUsageFlags usage, bool mipmapped = true);
+	AllocatedImage create_image(void* data, VkExtent3D size, VkFormat format, VkImageUsageFlags usage, bool mipmapped = true);
 	void destroy_image(const AllocatedImage& img);
 private:
 
