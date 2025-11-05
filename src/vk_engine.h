@@ -9,6 +9,14 @@
 #include "vk_loader.h"
 #include "camera.h"
 
+struct EngineStats {
+  float frametime;
+  int triangle_count;
+  int drawcall_count;
+  float scene_update_time;
+  float mesh_draw_time;
+};
+
 class VulkanEngine;
 struct MeshAsset;
 struct ComputePushConstants {
@@ -238,6 +246,8 @@ public:
 
 	Camera mainCamera;
 	std::unordered_map<std::string, std::shared_ptr<LoadedGLTF>> loadedScenes;
+
+	EngineStats stats;
 
 	void init_mesh_pipeline();
 
